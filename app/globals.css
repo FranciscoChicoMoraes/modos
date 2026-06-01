@@ -24,3 +24,138 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Custom animations for modals */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes expandDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    overflow: visible;
+  }
+}
+
+@keyframes avatarFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Tonalidade azul forte com animação minimalista */
+@keyframes blueGradientShine {
+  0%, 100% {
+    filter: brightness(1);
+    box-shadow: 0 0 4px rgba(37, 99, 235, 0.6);
+  }
+  50% {
+    filter: brightness(1.08);
+    box-shadow: 0 0 6px rgba(37, 99, 235, 0.9);
+  }
+}
+
+/* Opção 2: Brilho giratório */
+@keyframes blueRotatingGlow {
+  0% {
+    box-shadow: 8px 0 0 -2px rgba(59, 130, 246, 0.8),
+                5.6px 5.6px 0 -2px rgba(59, 130, 246, 0.6);
+  }
+  25% {
+    box-shadow: 0 8px 0 -2px rgba(59, 130, 246, 0.8),
+                -5.6px 5.6px 0 -2px rgba(59, 130, 246, 0.6);
+  }
+  50% {
+    box-shadow: -8px 0 0 -2px rgba(59, 130, 246, 0.8),
+                -5.6px -5.6px 0 -2px rgba(59, 130, 246, 0.6);
+  }
+  75% {
+    box-shadow: 0 -8px 0 -2px rgba(59, 130, 246, 0.8),
+                5.6px -5.6px 0 -2px rgba(59, 130, 246, 0.6);
+  }
+  100% {
+    box-shadow: 8px 0 0 -2px rgba(59, 130, 246, 0.8),
+                5.6px 5.6px 0 -2px rgba(59, 130, 246, 0.6);
+  }
+}
+
+/* Opção 3: Brilho contínuo suave */
+@keyframes blueSoftGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px 2px rgba(59, 130, 246, 0.8);
+  }
+}
+
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-backdropFadeIn {
+    animation: backdropFadeIn 0.3s ease-out;
+    backdrop-filter: blur(4px) !important;
+  }
+
+  .animate-modalSlideIn {
+    animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .animate-expandDown {
+    animation: expandDown 0.3s ease-out;
+  }
+
+  .animate-avatarFadeIn {
+    animation: avatarFadeIn 0.4s ease-out 0.1s both;
+  }
+
+  .animate-blueGradientShine {
+    animation: blueGradientShine 2s ease-in-out infinite;
+  }
+
+  .animate-blueRotatingGlow {
+    animation: blueRotatingGlow 2s linear infinite;
+  }
+
+  .animate-blueSoftGlow {
+    animation: blueSoftGlow 2s ease-in-out infinite;
+  }
+}
