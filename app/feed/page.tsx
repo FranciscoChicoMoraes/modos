@@ -81,9 +81,12 @@ export default function FeedPage() {
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.target !== canvasRef.current && !(e.target as HTMLElement).className.includes('pan-enabled')) {
-      return
-    }
+    const target = e.target as HTMLElement
+    const tagName = target.tagName.toLowerCase()
+    const isInteractive = tagName === 'button' || tagName === 'input' || tagName === 'a'
+    
+    if (isInteractive) return
+    
     setIsPanning(true)
     setPanStart({ x: e.clientX - panX, y: e.clientY - panY })
   }
@@ -118,10 +121,10 @@ export default function FeedPage() {
         <div className="w-full h-12 bg-gray-300 rounded-full" />
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Pan enabled */}
       <div
         ref={canvasRef}
-        className="flex-1 overflow-hidden bg-gray-50 cursor-grab active:cursor-grabbing pan-enabled"
+        className="flex-1 overflow-hidden bg-gray-50 cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
