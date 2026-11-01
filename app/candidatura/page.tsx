@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Mail, Phone, User, MessageSquare, Send } from 'lucide-react'
 import { Job } from '@/types'
@@ -27,7 +27,7 @@ interface FormData {
   [key: string]: string
 }
 
-export default function Candidatura() {
+function FormularioDeCandidatura() {
   const searchParams = useSearchParams()
   const vagaId = searchParams.get('vaga')
   const [job, setJob] = useState<Job | null>(null)
@@ -259,5 +259,20 @@ export default function Candidatura() {
         </form>
       </div>
     </div>
+  )
+}
+
+// useSearchParams precisa de um limite de suspensão para a página ser gerada
+export default function Candidatura() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-sm text-gray-500">
+          Carregando...
+        </div>
+      }
+    >
+      <FormularioDeCandidatura />
+    </Suspense>
   )
 }

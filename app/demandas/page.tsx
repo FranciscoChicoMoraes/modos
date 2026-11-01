@@ -461,11 +461,11 @@ export default function DemandasPage() {
   }
 
   const distribuirTarefas = (dataInicial: string, quantidade: number): Array<{ data: string; periodo: 'manha' | 'tarde' }> => {
-    const resultado = []
+    const resultado: Array<{ data: string; periodo: 'manha' | 'tarde' }> = []
     for (let i = 0; i < quantidade; i++) {
       const diaOffset = i % 7
       const data = somarDias(dataInicial, diaOffset)
-      const periodo = Math.floor(i / 7) % 2 === 0 ? 'manha' : 'tarde'
+      const periodo: 'manha' | 'tarde' = Math.floor(i / 7) % 2 === 0 ? 'manha' : 'tarde'
       resultado.push({ data, periodo })
     }
     return resultado
@@ -586,6 +586,10 @@ export default function DemandasPage() {
     )
 
     // Salvar no Supabase
+    const tarefaAtual = empresas
+      .find(e => e.id === selectedTarefaEdit.empresaId)
+      ?.tarefas.find(t => t.id === selectedTarefaEdit.tarefaId)
+
     try {
       const res = await fetch('/api/demandas/tarefas', {
         method: 'PATCH',
@@ -593,9 +597,9 @@ export default function DemandasPage() {
         body: JSON.stringify({
           id: selectedTarefaEdit.tarefaId,
           descricao: editTarefaDescricao,
-          data: editTarefaData || selectedTarefaEdit.data,
+          data: editTarefaData || tarefaAtual?.data,
           periodo: editTarefaPeriodo,
-          concluida: selectedTarefaEdit.concluida
+          concluida: tarefaAtual?.concluida ?? false
         })
       })
 

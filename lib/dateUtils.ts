@@ -36,12 +36,13 @@ export const distribuirTarefas = (
   quantidade: number,
   diasJanela: number = 7
 ): Array<{ data: string; periodo: 'manha' | 'tarde' }> => {
-  const resultado = []
+  const resultado: Array<{ data: string; periodo: 'manha' | 'tarde' }> = []
 
   for (let i = 0; i < quantidade; i++) {
     const diaOffset = i % diasJanela
     const data = somarDias(dataInicial, diaOffset)
-    const periodo = Math.floor(i / diasJanela) % 2 === 0 ? 'manha' : 'tarde'
+    const periodo: 'manha' | 'tarde' =
+      Math.floor(i / diasJanela) % 2 === 0 ? 'manha' : 'tarde'
     resultado.push({ data, periodo })
   }
 
