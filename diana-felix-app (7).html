@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diana Felix — Gestão de Conteúdo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C9A84C;--gold-light:#E8D5A0;
+  --black:#0A0A0A;--dark:#141414;--surface:#1C1C1C;--surface2:#242424;
+  --border:rgba(201,168,76,0.15);--border-h:rgba(201,168,76,0.35);
+  --text:#F0EDE6;--muted:#8A8478;--dim:#4A4640;
+  --green:#4CAF7A;--red:#C94C4C;--amber:#C9934C;--blue:#378ADD;
+  --reels:#E1306C;
+}
+.light{
+  --black:#F5F3EE;--dark:#ECEAE4;--surface:#FFFFFF;--surface2:#F0EDE6;
+  --border:rgba(0,0,0,0.08);--border-h:rgba(0,0,0,0.2);
+  --text:#1A1814;--muted:#6B6560;--dim:#B0ADA8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);height:100vh;overflow:hidden;display:flex;transition:background 0.2s,color 0.2s;}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;}
+
+/* Sidebar */
+.sidebar{width:210px;min-width:210px;background:var(--dark);border-right:0.5px solid var(--border);display:flex;flex-direction:column;height:100vh;transition:background 0.2s;}
+.logo{padding:1.25rem;border-bottom:0.5px solid var(--border);}
+.logo h1{font-size:18px;font-weight:300;color:var(--gold);letter-spacing:0.04em;}
+.logo p{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;}
+.nav{flex:1;padding:0.75rem 0;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 1.1rem;font-size:12px;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;}
+.nav-item:hover{color:var(--text);background:rgba(201,168,76,0.04);}
+.nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,0.06);}
+.nav-item svg{width:14px;height:14px;flex-shrink:0;}
+.sidebar-foot{padding:0.875rem 1.1rem;border-top:0.5px solid var(--border);display:flex;flex-direction:column;gap:8px;}
+.sidebar-foot label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px;}
+.sidebar-foot input{width:100%;background:var(--surface);border:0.5px solid var(--border);border-radius:6px;padding:6px 9px;font-size:11px;color:var(--text);font-family:'DM Sans',sans-serif;}
+.sidebar-foot input:focus{outline:none;border-color:var(--gold);}
+.api-status{font-size:10px;margin-top:3px;min-height:13px;}
+.theme-btn{display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--surface);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.theme-btn:hover{border-color:var(--border-h);color:var(--text);}
+
+/* Main */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.pane{display:none;flex:1;overflow-y:auto;padding:1.5rem;flex-direction:column;}
+.pane.active{display:flex;}
+.pane-hdr{margin-bottom:1.25rem;padding-bottom:0.875rem;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.pane-hdr h2{font-size:24px;font-weight:300;letter-spacing:0.02em;}
+.pane-hdr p{font-size:12px;color:var(--muted);margin-top:2px;}
+#pane-feed{padding:0;overflow:hidden;}
+#pane-feed .pane-hdr{padding:1rem 1.25rem 0.875rem;margin-bottom:0;flex-shrink:0;}
+
+/* Cards */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.75rem;flex-shrink:0;transition:background 0.2s;}
+.card-title{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field label{font-size:10px;color:var(--muted);}
+.field input,.field select,.field textarea{background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);}
+.field select option{background:var(--surface2);}
+.field textarea{resize:vertical;min-height:60px;}
+.tag-box{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px;}
+.tag{font-size:10px;background:rgba(201,168,76,0.1);border:0.5px solid rgba(201,168,76,0.25);border-radius:20px;padding:2px 8px;color:var(--gold);display:inline-flex;align-items:center;gap:3px;}
+.tag button{background:none;border:none;color:var(--gold);cursor:pointer;font-size:11px;padding:0;opacity:0.6;}
+.tag-input{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;}
+.tag-input:focus{outline:none;border-color:var(--gold);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;border:none;}
+.btn-gold{background:var(--gold);color:var(--black);font-weight:500;}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-gold:disabled{opacity:0.35;cursor:not-allowed;}
+.btn-ghost{background:transparent;color:var(--muted);border:0.5px solid var(--border);}
+.btn-ghost:hover{border-color:var(--border-h);color:var(--text);}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-full{width:100%;}
+.photo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:7px;}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;border:0.5px solid var(--border);}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-thumb .rm{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.add-thumb{aspect-ratio:1;border-radius:6px;border:1px dashed var(--border-h);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);font-size:20px;transition:all 0.15s;}
+.add-thumb:hover{border-color:var(--gold);color:var(--gold);}
+.prog-wrap{margin-bottom:0.75rem;flex-shrink:0;}
+.prog-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.prog-bar{height:2px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 0.3s;width:0%;}
+.leg-card{border:0.5px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:7px;flex-shrink:0;}
+.leg-hdr{display:flex;align-items:center;gap:9px;padding:7px 11px;background:var(--surface2);border-bottom:0.5px solid var(--border);}
+.leg-hdr img{width:36px;height:36px;object-fit:cover;border-radius:5px;flex-shrink:0;}
+.leg-hdr .lname{font-size:12px;font-weight:500;flex:1;}
+.leg-body{padding:9px 11px;font-size:12px;line-height:1.75;white-space:pre-wrap;}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;}
+.bg-gen{background:rgba(201,147,76,0.15);color:var(--amber);}
+.bg-ok{background:rgba(76,175,122,0.15);color:var(--green);}
+.bg-err{background:rgba(201,76,76,0.15);color:var(--red);}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;}
+.lib-card{background:var(--surface);border:0.5px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:all 0.15s;}
+.lib-card:hover{border-color:var(--border-h);transform:translateY(-1px);}
+.lib-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+.lib-info{padding:6px 8px;}
+.lib-name{font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.lib-prev{font-size:10px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;}
+.lib-detail{display:none;margin-top:0.875rem;background:var(--surface);border:0.5px solid var(--border);border-radius:9px;overflow:hidden;flex-shrink:0;}
+.lib-detail.open{display:block;}
+.lib-detail-inner{display:flex;gap:11px;padding:0.875rem;}
+.lib-detail-inner img{width:80px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;}
+.lib-txt{font-size:12px;line-height:1.75;white-space:pre-wrap;flex:1;}
+.lib-acts{display:flex;gap:5px;margin-top:7px;}
+.status-msg{font-size:11px;min-height:15px;margin-top:5px;flex-shrink:0;color:var(--green);}
+.empty-state{text-align:center;padding:2.5rem;color:var(--dim);font-size:12px;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:1rem;flex-shrink:0;}
+.dash-card{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:0.875rem;transition:background 0.2s;}
+.dash-num{font-size:28px;font-weight:300;font-family:'Cormorant Garamond',serif;color:var(--gold);}
+.dash-label{font-size:11px;color:var(--muted);margin-top:2px;}
+.dash-chart{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;flex-shrink:0;}
+.dash-chart h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.bar-label{font-size:11px;color:var(--muted);width:60px;flex-shrink:0;}
+.bar-track{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--gold);border-radius:3px;transition:width 0.5s;}
+.bar-val{font-size:11px;color:var(--muted);width:20px;text-align:right;flex-shrink:0;}
+
+/* Feed toolbar */
+#feed-toolbar{display:flex;align-items:center;gap:5px;padding:7px 1.25rem;background:var(--surface);border-bottom:0.5px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+#feed-toolbar button{font-size:11px;padding:4px 9px;background:transparent;border:0.5px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+#feed-toolbar button:hover{border-color:var(--border-h);color:var(--text);}
+.zoom-label{font-size:11px;color:var(--muted);min-width:36px;text-align:center;}
+.tb-sep{width:0.5px;height:13px;background:var(--border);margin:0 2px;}
+.sel-bar{display:none;align-items:center;gap:7px;padding:5px 1.25rem;background:rgba(55,138,221,0.07);border-bottom:0.5px solid rgba(55,138,221,0.2);flex-shrink:0;}
+.sel-bar.on{display:flex;}
+.sel-bar span{font-size:11px;color:#85B7EB;flex:1;}
+.sel-bar button{font-size:11px;padding:3px 9px;background:rgba(55,138,221,0.12);border:0.5px solid rgba(55,138,221,0.3);border-radius:5px;color:#85B7EB;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* Feed layout */
+.feed-layout{display:flex;flex:1;overflow:hidden;}
+#canvas-wrap{flex:1;overflow:hidden;cursor:grab;position:relative;user-select:none;}
+#canvas-wrap.pan{cursor:grabbing;}
+#canvas-inner{position:absolute;transform-origin:0 0;will-change:transform;}
+.feed-grid{display:grid;grid-template-columns:repeat(3,140px);gap:3px;padding:50px;}
+.c-arrow{font-size:10px;color:var(--dim);text-align:center;padding:3px 50px;}
+.fc{position:relative;width:140px;height:175px;background:var(--surface);border-radius:2px;overflow:hidden;border:0.5px solid var(--border);user-select:none;}
+.fc.has{cursor:grab;}
+.fc.dragging{opacity:0.25;}
+.fc.drop-over{outline:2px solid var(--gold);outline-offset:-2px;}
+.fc.sel{outline:2px solid var(--blue);outline-offset:-2px;}
+.fc img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+.fc .fn{position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;font-weight:500;padding:1px 5px;border-radius:7px;pointer-events:none;}
+.fc .fd{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;}
+.fc .fc-badge{position:absolute;bottom:4px;left:4px;font-size:8px;padding:1px 5px;border-radius:5px;font-weight:600;pointer-events:none;}
+.fc .fc-carr-badge{background:rgba(201,168,76,0.85);color:#000;}
+.fc .fc-reels-badge{background:var(--reels);color:#fff;}
+.fc .fc-cnt{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;padding:1px 4px;border-radius:7px;pointer-events:none;}
+.fc .fe{position:absolute;bottom:4px;left:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:5px;font-size:9px;cursor:pointer;padding:2px;}
+.fc-empty{width:140px;height:175px;background:var(--surface);border-radius:2px;border:0.5px dashed var(--border-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--dim);}
+.fc-empty .ep{font-size:20px;}
+.fc-empty-btns{display:flex;flex-direction:column;gap:2px;align-items:center;}
+.fc-empty .ec{font-size:8px;background:rgba(201,168,76,0.08);border:0.5px solid var(--border-h);border-radius:5px;padding:2px 6px;color:var(--gold);cursor:pointer;white-space:nowrap;}
+.fc-empty .er{font-size:8px;background:rgba(225,48,108,0.1);border:0.5px solid rgba(225,48,108,0.3);border-radius:5px;padding:2px 6px;color:var(--reels);cursor:pointer;}
+
+/* Phone panel */
+.phone-panel{width:230px;min-width:230px;background:var(--dark);border-left:0.5px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 12px 10px;overflow:hidden;gap:8px;transition:background 0.2s;}
+.phone-panel-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;}
+.phone-frame{width:195px;height:400px;background:#000;border-radius:32px;border:7px solid #1a1a1a;overflow:hidden;position:relative;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);}
+.phone-screen{width:100%;height:100%;overflow-y:auto;background:#000;scrollbar-width:none;}
+.phone-screen::-webkit-scrollbar{display:none;}
+
+/* Instagram-accurate header */
+.ig-header{background:#000;padding:0 12px;}
+.ig-topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 0 6px;}
+.ig-username{font-size:13px;font-weight:700;color:#fff;letter-spacing:-0.2px;}
+.ig-topbar-icons{display:flex;gap:10px;}
+.ig-topbar-icons svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.8;}
+.ig-profile-row{display:flex;align-items:center;gap:10px;padding-bottom:8px;}
+.ig-avatar-wrap{position:relative;flex-shrink:0;}
+.ig-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);padding:2px;display:flex;align-items:center;justify-content:center;}
+.ig-avatar-inner{width:58px;height:58px;border-radius:50%;border:2px solid #000;overflow:hidden;background:#2a2a2a;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.ig-avatar-inner img{width:100%;height:100%;object-fit:cover;display:block;}
+.ig-avatar-inner span{font-size:18px;color:#888;}
+.ig-name-bio{flex:1;}
+.ig-display-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:2px;}
+.ig-bio{font-size:11px;color:#fff;line-height:1.4;white-space:pre-wrap;}
+.ig-bio[contenteditable]{outline:none;min-height:30px;}
+.ig-bio[contenteditable]:empty:before{content:attr(data-placeholder);color:#555;}
+.ig-tabs{display:flex;border-top:0.5px solid #262626;margin-top:4px;}
+.ig-tab{flex:1;display:flex;justify-content:center;padding:9px 0;position:relative;}
+.ig-tab.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:#fff;}
+.ig-tab svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.5;}
+.ig-tab.active svg{stroke:#fff;}
+.ig-tab:not(.active) svg{stroke:#555;}
+
+/* Instagram grid */
+.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#000;}
+.ig-cell{position:relative;aspect-ratio:1;background:#111;overflow:hidden;}
+.ig-cell img{width:100%;height:100%;object-fit:cover;display:block;}
+.ig-cell-empty{aspect-ratio:1;background:#111;}
+.ig-reels-icon{position:absolute;top:4px;right:4px;}
+.ig-reels-icon svg{width:12px;height:12px;fill:white;filter:drop-shadow(0 0 2px rgba(0,0,0,0.5));}
+.ig-carr-icon{position:absolute;top:4px;right:4px;}
+.ig-carr-icon svg{width:12px;height:12px;fill:white;filter:drop-shadow(0 0 2px rgba(0,0,0,0.5));}
+
+.export-btn-wrap{width:195px;flex-shrink:0;}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:1.1rem;width:360px;max-width:90vw;max-height:85vh;display:flex;flex-direction:column;}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;color:var(--gold);margin-bottom:9px;flex-shrink:0;}
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:9px;overflow-y:auto;max-height:240px;}
+.mt{position:relative;aspect-ratio:1;border-radius:5px;overflow:hidden;border:0.5px solid var(--border);cursor:grab;}
+.mt.dragging-m{opacity:0.25;}
+.mt.drop-m{outline:2px solid var(--gold);outline-offset:-2px;}
+.mt img{width:100%;height:100%;object-fit:cover;}
+.mt .mi{position:absolute;top:2px;left:2px;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;padding:1px 4px;border-radius:4px;}
+.mt .mr{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:15px;height:15px;font-size:10px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;}
+.ma{aspect-ratio:1;border-radius:5px;border:0.5px dashed var(--border-h);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--dim);}
+.ma:hover{border-color:var(--gold);color:var(--gold);}
+.modal-acts{display:flex;gap:7px;flex-shrink:0;}
+.modal-acts button{flex:1;font-size:12px;padding:7px;background:transparent;border:0.5px solid var(--border);border-radius:7px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;}
+.modal-acts button:hover{border-color:var(--border-h);color:var(--text);}
+
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-h);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo"><h1>Diana Felix</h1><p>Gestão de Conteúdo</p></div>
+  <nav class="nav">
+    <div class="nav-item" onclick="go('dashboard')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="3" rx="1"/><rect x="9" y="6" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/></svg>Dashboard
+    </div>
+    <div class="nav-item active" onclick="go('briefing')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="9" y2="9"/></svg>Briefing
+    </div>
+    <div class="nav-item" onclick="go('legendas')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Legendas
+    </div>
+    <div class="nav-item" onclick="go('feed')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>Feed
+    </div>
+    <div class="nav-item" onclick="go('biblioteca')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="10" height="10" rx="1"/><path d="M4 1h10a1 1 0 011 1v10"/></svg>Biblioteca
+    </div>
+  </nav>
+  <div class="sidebar-foot">
+    <div>
+      <label>Chave da API Anthropic</label>
+      <input type="password" id="api-key" placeholder="sk-ant-..." oninput="checkKey(this.value)">
+      <div class="api-status" id="api-status"></div>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><circle cx="8" cy="8" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="1" y1="8" x2="3" y2="8"/><line x1="13" y1="8" x2="15" y2="8"/></svg>
+      <span id="theme-label">Modo claro</span>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div id="pane-dashboard" class="pane">
+    <div class="pane-hdr"><h2>Dashboard</h2><p>Resumo do conteúdo desta sessão.</p></div>
+    <div class="dash-grid">
+      <div class="dash-card"><div class="dash-num" id="d-total">0</div><div class="dash-label">Legendas geradas</div></div>
+      <div class="dash-card"><div class="dash-num" id="d-feed">0</div><div class="dash-label">Slots no feed</div></div>
+      <div class="dash-card"><div class="dash-num" id="d-reels">0</div><div class="dash-label">Reels</div></div>
+      <div class="dash-card"><div class="dash-num" id="d-carr">0</div><div class="dash-label">Carrosseis</div></div>
+    </div>
+    <div class="dash-chart">
+      <h3>Tipos de conteúdo no feed</h3>
+      <div class="bar-row"><span class="bar-label">Fotos</span><div class="bar-track"><div class="bar-fill" id="bar-foto" style="width:0%"></div></div><span class="bar-val" id="bv-foto">0</span></div>
+      <div class="bar-row"><span class="bar-label">Carrosseis</span><div class="bar-track"><div class="bar-fill" id="bar-carr2" style="width:0%;background:var(--amber)"></div></div><span class="bar-val" id="bv-carr2">0</span></div>
+      <div class="bar-row"><span class="bar-label">Reels</span><div class="bar-track"><div class="bar-fill" id="bar-reels2" style="width:0%;background:var(--reels)"></div></div><span class="bar-val" id="bv-reels2">0</span></div>
+    </div>
+  </div>
+
+  <!-- BRIEFING -->
+  <div id="pane-briefing" class="pane active">
+    <div class="pane-hdr"><h2>Briefing da campanha</h2><p>Configurações usadas na geração de legendas.</p></div>
+    <div class="card">
+      <div class="card-title">Identidade</div>
+      <div class="g2" style="margin-bottom:7px;">
+        <div class="field"><label>Nome da loja</label><input type="text" id="b-loja" value="Diana Felix Relojoaria"></div>
+        <div class="field"><label>Categoria</label><input type="text" id="b-cat" value="Ótica"></div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Coleção</label><input type="text" id="b-col" value="Vision"></div>
+        <div class="field"><label>Produtos</label><input type="text" id="b-prod" value="Armações, óculos solar"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Perfil do Instagram (mockup)</div>
+      <div class="g2" style="margin-bottom:7px;">
+        <div class="field"><label>@ usuário</label><input type="text" id="ig-user" value="dianafélixoficial" oninput="updatePhone()"></div>
+        <div class="field"><label>Nome de exibição</label><input type="text" id="ig-name" value="Diana Felix Relojoaria" oninput="updatePhone()"></div>
+      </div>
+      <div class="field"><label>Bio</label><textarea id="ig-bio" rows="3" oninput="updatePhone()">• Armações e Óculos de Sol
+• Relojoaria e Semijoias
+📍 Monte Negro, RO</textarea></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Público e tom</div>
+      <div class="g2" style="margin-bottom:7px;">
+        <div class="field"><label>Público-alvo</label><input type="text" id="b-pub" value="Mulheres e homens"></div>
+        <div class="field"><label>Interesse</label><input type="text" id="b-int" value="Trocar óculos"></div>
+      </div>
+      <div class="field"><label>Personalidade</label><input type="text" id="b-tom" value="Prestativa, acolhedora, empática, refinada, entende de moda e estilo"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Regras</div>
+      <div class="g3" style="margin-bottom:7px;">
+        <div class="field"><label>Comprimento</label><select id="b-comp"><option value="1 a 2 linhas">1 a 2 linhas</option><option value="3 a 4 linhas">3 a 4 linhas</option></select></div>
+        <div class="field"><label>Idioma</label><select id="b-idioma"><option value="português brasileiro">Português (BR)</option><option value="inglês">Inglês</option></select></div>
+        <div class="field"><label>Emojis</label><select id="b-emoji"><option value="sem emojis">Sem emojis</option><option value="máximo 1 emoji">Máximo 1</option><option value="máximo 2 emojis">Máximo 2</option></select></div>
+      </div>
+      <div class="field"><label>Palavras proibidas</label><input type="text" id="b-proib" value="sexy, sedutor, presença, chegar chegando, tomara que caia, decotinho"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tags da coleção</div>
+      <div class="tag-box" id="tag-box"></div>
+      <input type="text" class="tag-input" id="tag-in" placeholder="Digite e pressione Enter" onkeydown="addTag(event)">
+    </div>
+    <button class="btn btn-gold" onclick="saveBriefing()" style="align-self:flex-start;">Salvar briefing</button>
+    <div class="status-msg" id="b-msg"></div>
+  </div>
+
+  <!-- LEGENDAS -->
+  <div id="pane-legendas" class="pane">
+    <div class="pane-hdr"><h2>Gerador de legendas</h2><p>Adicione até 10 fotos e gere com IA.</p></div>
+    <div class="card">
+      <div class="card-title">Fotos do lote</div>
+      <div class="photo-grid" id="photo-grid"><div class="add-thumb" onclick="document.getElementById('fi-leg').click()">+</div></div>
+      <input type="file" id="fi-leg" accept="image/*" multiple style="display:none" onchange="addFotos(this.files)">
+    </div>
+    <div style="display:flex;gap:7px;margin-bottom:0.75rem;flex-shrink:0;">
+      <button class="btn btn-gold btn-full" id="gen-btn" onclick="gerarLote()" disabled>Selecione fotos para gerar</button>
+      <button class="btn btn-ghost btn-sm" id="copy-all-btn" onclick="copyAll()" style="display:none;">Copiar tudo</button>
+    </div>
+    <div class="prog-wrap" id="prog-wrap" style="display:none;"><div class="prog-label" id="prog-label">Gerando...</div><div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div></div>
+    <div id="leg-list"></div>
+    <div class="status-msg" id="leg-msg"></div>
+  </div>
+
+  <!-- FEED -->
+  <div id="pane-feed" class="pane">
+    <div class="pane-hdr"><h2>Planejador de feed</h2><p>Scroll = zoom · Arrastar fundo = mover · Cmd+clique = selecionar para carrossel</p></div>
+    <div id="feed-toolbar">
+      <button onclick="document.getElementById('fi-feed').click()">+ Foto</button>
+      <button onclick="addReelsSlot()" style="color:var(--reels);border-color:rgba(225,48,108,0.3);">+ Reels</button>
+      <button onclick="clearFeed()">Limpar</button>
+      <div class="tb-sep"></div>
+      <button onclick="fzOut()">−</button>
+      <span class="zoom-label" id="zoom-lbl">100%</span>
+      <button onclick="fzIn()">+</button>
+      <button onclick="fzFit()">Ajustar</button>
+      <div class="tb-sep"></div>
+      <button onclick="exportFeed()" style="color:var(--green);border-color:rgba(76,175,122,0.3);">Exportar PNG</button>
+      <button onclick="exportClientHTML()" style="color:var(--gold);border-color:var(--border-h);">Enviar para cliente</button>
+    </div>
+    <input type="file" id="fi-feed" accept="image/*" multiple style="display:none" onchange="addFeedFiles(this.files)">
+    <input type="file" id="fi-reels" accept="image/*" style="display:none" onchange="addReelsThumb(this.files)">
+    <input type="file" id="fi-carr" accept="image/*" multiple style="display:none" onchange="addCarrFiles(this.files)">
+    <input type="file" id="fi-avatar" accept="image/*" style="display:none" onchange="setAvatar(this.files)">
+    <div class="sel-bar" id="sel-bar"><span id="sel-lbl"></span><button onclick="makeCarr()">Tornar carrossel</button><button onclick="clearSel()">Cancelar</button></div>
+    <div class="feed-layout">
+      <div id="canvas-wrap">
+        <div id="canvas-inner">
+          <div class="c-arrow">↑ mais recente</div>
+          <div class="feed-grid" id="feed-grid"></div>
+          <div class="c-arrow">↓ primeira postagem</div>
+        </div>
+      </div>
+      <!-- Phone mockup -->
+      <div class="phone-panel">
+        <div class="phone-panel-title">Preview Instagram</div>
+        <div class="phone-frame">
+          <div class="phone-screen" id="phone-screen">
+            <div class="ig-header">
+              <div class="ig-topbar">
+                <span class="ig-username" id="ph-username">dianafélixoficial</span>
+                <div class="ig-topbar-icons">
+                  <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                </div>
+              </div>
+              <div class="ig-profile-row">
+                <div class="ig-avatar-wrap">
+                  <div class="ig-avatar">
+                    <div class="ig-avatar-inner" onclick="document.getElementById('fi-avatar').click()" title="Clique para trocar foto">
+                      <img id="ph-avatar-img" src="" style="display:none;">
+                      <span id="ph-avatar-placeholder">+</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="ig-name-bio">
+                  <div class="ig-display-name" id="ph-name">Diana Felix Relojoaria</div>
+                  <div class="ig-bio" id="ph-bio">• Armações e Óculos de Sol
+• Relojoaria e Semijoias
+📍 Monte Negro, RO</div>
+                </div>
+              </div>
+              <div class="ig-tabs">
+                <div class="ig-tab active">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                </div>
+                <div class="ig-tab">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                </div>
+                <div class="ig-tab">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                </div>
+                <div class="ig-tab">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="ig-grid" id="ig-grid"></div>
+          </div>
+        </div>
+        <div class="export-btn-wrap">
+          <button class="btn btn-gold btn-full btn-sm" onclick="exportClientHTML()" style="font-size:10px;">Gerar link para cliente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIBLIOTECA -->
+  <div id="pane-biblioteca" class="pane">
+    <div class="pane-hdr"><h2>Biblioteca</h2><p>Todas as legendas geradas nesta sessão.</p></div>
+    <div id="lib-empty" class="empty-state">Nenhuma legenda gerada ainda.</div>
+    <div class="lib-grid" id="lib-grid"></div>
+    <div class="lib-detail" id="lib-detail">
+      <div class="lib-detail-inner">
+        <img id="lib-img" src="">
+        <div style="flex:1;">
+          <div class="lib-txt" id="lib-txt"></div>
+          <div class="lib-acts">
+            <button class="btn btn-gold btn-sm" onclick="copyLib()">Copiar</button>
+            <button class="btn btn-ghost btn-sm" onclick="closeLib()">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="m-title">Carrossel</h3>
+    <div class="mg" id="m-grid"></div>
+    <div class="modal-acts"><button onclick="closeModal()">Fechar</button></div>
+  </div>
+</div>
+
+<script>
+let tags=['#DianaFelix','#MonteNegro','#Ótica','#Ariquemes','#ÓticaEmMonteNegro'];
+let fotos=[],legendas=[],feedSlots=[],libSel=null,editSlot=null,dragSrc=null,fSel=new Set();
+let fScale=1,fTx=40,fTy=40,panning=false,pStart={x:0,y:0},pOrig={x:0,y:0},canvasReady=false;
+let mDragSrc=null,isLight=false,avatarSrc='';
+
+function toggleTheme(){isLight=!isLight;document.body.classList.toggle('light',isLight);document.getElementById('theme-label').textContent=isLight?'Modo escuro':'Modo claro';}
+
+function go(id){
+  document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active',['dashboard','briefing','legendas','feed','biblioteca'][i]===id));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  if(id==='feed') setTimeout(()=>{initCanvas();fzFit();},60);
+  if(id==='biblioteca') renderLib();
+  if(id==='dashboard') updateDash();
+}
+
+function checkKey(v){const s=document.getElementById('api-status');if(v.startsWith('sk-ant-')){s.textContent='✓ Chave válida';s.style.color='var(--green)';}else if(v.length>0){s.textContent='Formato inválido';s.style.color='var(--red)';}else s.textContent='';}
+function getKey(){return document.getElementById('api-key').value.trim();}
+
+function updatePhone(){
+  const user=document.getElementById('ig-user').value||'usuario';
+  const name=document.getElementById('ig-name').value||'Nome';
+  const bio=document.getElementById('ig-bio').value||'';
+  document.getElementById('ph-username').textContent=user;
+  document.getElementById('ph-name').textContent=name;
+  document.getElementById('ph-bio').textContent=bio;
+}
+
+async function setAvatar(files){
+  if(!files[0]) return;
+  const c=await compress(files[0],200);
+  avatarSrc=c.src;
+  const img=document.getElementById('ph-avatar-img');
+  const ph=document.getElementById('ph-avatar-placeholder');
+  img.src=avatarSrc;img.style.display='block';ph.style.display='none';
+  document.getElementById('fi-avatar').value='';
+}
+
+function renderTags(){const b=document.getElementById('tag-box');b.innerHTML='';tags.forEach((t,i)=>{const p=document.createElement('span');p.className='tag';p.innerHTML=`${t} <button onclick="removeTag(${i})">×</button>`;b.appendChild(p);});}
+renderTags();
+function addTag(e){if(e.key==='Enter'){const v=e.target.value.trim();if(v){tags.push(v.startsWith('#')?v:'#'+v);e.target.value='';renderTags();}}}
+function removeTag(i){tags.splice(i,1);renderTags();}
+function saveBriefing(){const m=document.getElementById('b-msg');m.textContent='Briefing salvo!';setTimeout(()=>m.textContent='',2000);}
+
+function compress(file,max=500){return new Promise(res=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{let w=img.width,h=img.height;if(w>max||h>max){if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);res({src:c.toDataURL('image/jpeg',0.72),b64:c.toDataURL('image/jpeg',0.72).split(',')[1],name:file.name});};img.src=url;});}
+
+async function addFotos(files){for(const f of Array.from(files).slice(0,10-fotos.length)){const c=await compress(f);fotos.push(c);renderFotoGrid();}document.getElementById('fi-leg').value='';}
+function removeFoto(i){fotos.splice(i,1);renderFotoGrid();}
+function renderFotoGrid(){const g=document.getElementById('photo-grid');g.innerHTML='';fotos.forEach((f,i)=>{const d=document.createElement('div');d.className='photo-thumb';d.innerHTML=`<img src="${f.src}"><button class="rm" onclick="removeFoto(${i})">×</button>`;g.appendChild(d);});if(fotos.length<10){const a=document.createElement('div');a.className='add-thumb';a.textContent='+';a.onclick=()=>document.getElementById('fi-leg').click();g.appendChild(a);}const btn=document.getElementById('gen-btn');btn.disabled=fotos.length===0;btn.textContent=fotos.length>0?`Gerar ${fotos.length} legenda${fotos.length>1?'s':''} →`:'Selecione fotos para gerar';}
+function buildPrompt(){const g=id=>document.getElementById(id).value;return `Você é uma vendedora especialista em moda e estilo com perfil: ${g('b-tom')}. Cria legendas para o Instagram da loja "${g('b-loja')}" (${g('b-cat')}).\nColeção: ${g('b-col')} | Produtos: ${g('b-prod')} | Público: ${g('b-pub')} | Interesse: ${g('b-int')} | Idioma: ${g('b-idioma')}\nMÉTODO: Círculo Dourado de Simon Sinek. PORQUÊ (emoção), COMO (diferenciais), O QUÊ (produto). Use CVB e Rapport.\nFORMATO — 3 blocos separados por linha em branco:\n[Frase de impacto]\n\n[Descrição com CVB]\n\n${tags.join(' ')}\nREGRAS: ${g('b-comp')} | ${g('b-emoji')} | Sem travessão (—) ou dois pontos (:) | Sem saudações | Proibido: ${g('b-proib')} | Responda APENAS com a legenda.`;}
+
+async function gerarLote(){const key=getKey();if(!key){alert('Adicione sua chave de API na barra lateral.');return;}if(!fotos.length)return;legendas=[];const list=document.getElementById('leg-list');list.innerHTML='';document.getElementById('copy-all-btn').style.display='none';document.getElementById('prog-wrap').style.display='block';document.getElementById('gen-btn').disabled=true;for(let i=0;i<fotos.length;i++){const f=fotos[i];document.getElementById('prog-fill').style.width=Math.round(i/fotos.length*100)+'%';document.getElementById('prog-label').textContent=`Gerando ${i+1} de ${fotos.length}...`;const card=document.createElement('div');card.className='leg-card';card.innerHTML=`<div class="leg-hdr"><img src="${f.src}"><span class="lname">${f.name}</span><span class="badge bg-gen">Gerando...</span></div><div class="leg-body" style="color:var(--dim);font-style:italic;">Aguarde...</div>`;list.appendChild(card);card.scrollIntoView({behavior:'smooth',block:'nearest'});try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:f.b64}},{type:'text',text:buildPrompt()}]}]})});const d=await r.json();if(d.error)throw new Error(d.error.message);const txt=d.content.map(b=>b.text||'').join('');legendas.push({src:f.src,name:f.name,txt});const idx=legendas.length-1;card.innerHTML=`<div class="leg-hdr"><img src="${f.src}"><span class="lname">${f.name}</span><span class="badge bg-ok">Pronta</span><button class="btn btn-ghost btn-sm" onclick="copyOne(${idx})">Copiar</button></div><div class="leg-body">${txt}</div>`;}catch(e){legendas.push({src:f.src,name:f.name,txt:''});card.innerHTML=`<div class="leg-hdr"><img src="${f.src}"><span class="lname">${f.name}</span><span class="badge bg-err">Erro</span></div><div class="leg-body" style="color:var(--red);">${e.message}</div>`;}}document.getElementById('prog-fill').style.width='100%';document.getElementById('prog-label').textContent='Concluído!';document.getElementById('copy-all-btn').style.display='inline-flex';document.getElementById('gen-btn').disabled=false;document.getElementById('gen-btn').textContent=`Gerar ${fotos.length} legenda${fotos.length>1?'s':''} →`;renderLib();updateDash();}
+function copyOne(i){navigator.clipboard.writeText(legendas[i].txt);}
+function copyAll(){const t=legendas.filter(l=>l.txt).map(l=>`${l.name}\n${l.txt}`).join('\n\n');navigator.clipboard.writeText(t).then(()=>{const m=document.getElementById('leg-msg');m.textContent='Todas copiadas!';setTimeout(()=>m.textContent='',2000);});}
+
+function renderLib(){const g=document.getElementById('lib-grid'),e=document.getElementById('lib-empty');const v=legendas.filter(l=>l.txt);if(!v.length){e.style.display='block';g.innerHTML='';return;}e.style.display='none';g.innerHTML='';v.forEach((l,i)=>{const c=document.createElement('div');c.className='lib-card';c.innerHTML=`<img src="${l.src}"><div class="lib-info"><div class="lib-name">${l.name}</div><div class="lib-prev">${l.txt.split('\n')[0]}</div></div>`;c.onclick=()=>openLib(i);g.appendChild(c);});}
+function openLib(i){const l=legendas.filter(x=>x.txt)[i];libSel=l;document.getElementById('lib-img').src=l.src;document.getElementById('lib-txt').textContent=l.txt;const d=document.getElementById('lib-detail');d.classList.add('open');d.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function closeLib(){document.getElementById('lib-detail').classList.remove('open');libSel=null;}
+function copyLib(){if(libSel)navigator.clipboard.writeText(libSel.txt);}
+
+function updateDash(){
+  const total=legendas.filter(l=>l.txt).length;
+  const reels=feedSlots.filter(s=>s.type==='reels').length;
+  const carrs=feedSlots.filter(s=>s.type==='carousel').length;
+  const fotos2=feedSlots.filter(s=>s.type==='single').length;
+  document.getElementById('d-total').textContent=total;
+  document.getElementById('d-feed').textContent=feedSlots.length;
+  document.getElementById('d-reels').textContent=reels;
+  document.getElementById('d-carr').textContent=carrs;
+  const mx=Math.max(feedSlots.length,1);
+  document.getElementById('bar-foto').style.width=Math.round(fotos2/mx*100)+'%';document.getElementById('bv-foto').textContent=fotos2;
+  document.getElementById('bar-carr2').style.width=Math.round(carrs/mx*100)+'%';document.getElementById('bv-carr2').textContent=carrs;
+  document.getElementById('bar-reels2').style.width=Math.round(reels/mx*100)+'%';document.getElementById('bv-reels2').textContent=reels;
+}
+
+function initCanvas(){
+  if(canvasReady)return;canvasReady=true;
+  const cw=document.getElementById('canvas-wrap');
+  cw.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,-e.deltaY);},{passive:false});
+  cw.addEventListener('mousedown',e=>{if(e.target.closest('.fc')||e.target.closest('.modal'))return;panning=true;cw.classList.add('pan');pStart={x:e.clientX,y:e.clientY};pOrig={x:fTx,y:fTy};});
+  window.addEventListener('mousemove',e=>{if(!panning)return;fTx=pOrig.x+(e.clientX-pStart.x);fTy=pOrig.y+(e.clientY-pStart.y);applyT();});
+  window.addEventListener('mouseup',()=>{panning=false;document.getElementById('canvas-wrap').classList.remove('pan');});
+}
+function applyT(){const ci=document.getElementById('canvas-inner');if(ci)ci.style.transform=`translate(${fTx}px,${fTy}px) scale(${fScale})`;document.getElementById('zoom-lbl').textContent=Math.round(fScale*100)+'%';}
+function zoomAt(cx,cy,delta){const cw=document.getElementById('canvas-wrap');const r=cw.getBoundingClientRect();const mx=cx-r.left,my=cy-r.top;const ns=Math.min(3,Math.max(0.15,fScale*(delta>0?1.12:0.89)));fTx=mx-(mx-fTx)*(ns/fScale);fTy=my-(my-fTy)*(ns/fScale);fScale=ns;applyT();}
+function fzIn(){const r=document.getElementById('canvas-wrap').getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,1);}
+function fzOut(){const r=document.getElementById('canvas-wrap').getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,-1);}
+function fzFit(){const g=document.getElementById('feed-grid'),cw=document.getElementById('canvas-wrap');if(!g||!cw)return;const gw=g.offsetWidth+100,gh=g.offsetHeight+100;const aw=cw.offsetWidth,ah=cw.offsetHeight;if(!aw||!ah)return;fScale=Math.min(aw/gw,ah/gh,1);fTx=(aw-gw*fScale)/2;fTy=(ah-gh*fScale)/2;applyT();}
+
+async function addFeedFiles(files){for(const f of Array.from(files)){const c=await compress(f);feedSlots.push({type:'single',imgs:[c]});renderFeed();}document.getElementById('fi-feed').value='';updateDash();}
+function addReelsSlot(){feedSlots.push({type:'reels',imgs:[]});renderFeed();updateDash();}
+async function addReelsThumb(files){if(editSlot===null)return;const c=await compress(files[0]);feedSlots[editSlot].imgs=[c];renderFeed();renderModal();document.getElementById('fi-reels').value='';}
+async function addCarrFiles(files){if(editSlot===null)return;for(const f of Array.from(files).slice(0,10-feedSlots[editSlot].imgs.length)){const c=await compress(f);feedSlots[editSlot].imgs.push(c);}document.getElementById('fi-carr').value='';renderModal();renderFeed();}
+function addCarrSlot(e){e.stopPropagation();feedSlots.push({type:'carousel',imgs:[]});editSlot=feedSlots.length-1;renderModal();document.getElementById('modal').classList.add('open');renderFeed();updateDash();}
+
+function cellClick(e,pi){if(!e.metaKey&&!e.ctrlKey)return;e.preventDefault();if(feedSlots[pi].type!=='single')return;fSel.has(pi)?fSel.delete(pi):fSel.add(pi);updateSelBar();renderFeed();}
+function updateSelBar(){const b=document.getElementById('sel-bar');if(fSel.size>=2){b.classList.add('on');document.getElementById('sel-lbl').textContent=`${fSel.size} fotos selecionadas`;}else b.classList.remove('on');}
+function clearSel(){fSel.clear();updateSelBar();renderFeed();}
+function makeCarr(){if(fSel.size<2)return;const idxs=Array.from(fSel).sort((a,b)=>a-b);const imgs=[];idxs.forEach(i=>feedSlots[i].imgs.forEach(img=>imgs.push(img)));const novo={type:'carousel',imgs};const novos=[];for(let i=0;i<feedSlots.length;i++){if(i===idxs[0])novos.push(novo);else if(!idxs.includes(i))novos.push(feedSlots[i]);}feedSlots=novos;fSel.clear();updateSelBar();renderFeed();updateDash();}
+
+function openModal(i){
+  editSlot=i;
+  const slot=feedSlots[i];
+  if(slot.type==='reels'){document.getElementById('fi-reels').click();return;}
+  slot.type='carousel';
+  renderModal();document.getElementById('modal').classList.add('open');
+}
+function renderModal(){
+  if(editSlot===null)return;
+  const slot=feedSlots[editSlot];
+  document.getElementById('m-title').textContent=`Carrossel — ${slot.imgs.length}/10`;
+  const g=document.getElementById('m-grid');g.innerHTML='';
+  slot.imgs.forEach((img,i)=>{
+    const t=document.createElement('div');t.className='mt';t.draggable=true;
+    t.innerHTML=`<img src="${img.src}"><div class="mi">${i+1}</div><button class="mr" onclick="rmCarrImg(${i})">×</button>`;
+    t.addEventListener('dragstart',e=>{mDragSrc=i;setTimeout(()=>t.classList.add('dragging-m'),0);e.dataTransfer.effectAllowed='move';});
+    t.addEventListener('dragend',()=>t.classList.remove('dragging-m'));
+    t.addEventListener('dragover',e=>{e.preventDefault();t.classList.add('drop-m');});
+    t.addEventListener('dragleave',()=>t.classList.remove('drop-m'));
+    t.addEventListener('drop',e=>{e.preventDefault();t.classList.remove('drop-m');if(mDragSrc!==null&&mDragSrc!==i){const tmp=slot.imgs[mDragSrc];slot.imgs[mDragSrc]=slot.imgs[i];slot.imgs[i]=tmp;mDragSrc=null;renderModal();renderFeed();}});
+    g.appendChild(t);
+  });
+  if(slot.imgs.length<10){const a=document.createElement('div');a.className='ma';a.textContent='+';a.onclick=()=>document.getElementById('fi-carr').click();g.appendChild(a);}
+}
+function rmCarrImg(i){if(editSlot===null)return;feedSlots[editSlot].imgs.splice(i,1);if(feedSlots[editSlot].imgs.length<=1)feedSlots[editSlot].type='single';renderModal();renderFeed();}
+function closeModal(){if(editSlot!==null&&feedSlots[editSlot]&&feedSlots[editSlot].imgs.length===0)feedSlots.splice(editSlot,1);document.getElementById('modal').classList.remove('open');editSlot=null;renderFeed();updateDash();}
+function delSlot(i){feedSlots.splice(i,1);renderFeed();updateDash();}
+function clearFeed(){feedSlots=[];fSel.clear();updateSelBar();renderFeed();updateDash();}
+
+function renderFeed(){
+  const g=document.getElementById('feed-grid');g.innerHTML='';
+  const n=feedSlots.length,total=Math.max(Math.ceil(Math.max(n,1)/3)*3,9);
+  for(let vi=0;vi<total;vi++){
+    const pi=total-1-vi;
+    if(pi<n){
+      const slot=feedSlots[pi],hasImg=slot.imgs.length>0,isCarr=slot.type==='carousel',isReels=slot.type==='reels',isSel=fSel.has(pi);
+      const cell=document.createElement('div');
+      cell.className='fc'+(hasImg?' has':'')+(isSel?' sel':'');
+      if(hasImg){
+        cell.draggable=!isSel;
+        let badge='';
+        if(isCarr)badge=`<div class="fc-badge fc-carr-badge">carrossel</div><div class="fc-cnt">${slot.imgs.length}</div>`;
+        if(isReels)badge=`<div class="fc-badge fc-reels-badge">Reels</div>`;
+        cell.innerHTML=`<img src="${slot.imgs[0].src}"><div class="fn">${pi+1}ª</div><button class="fd" onclick="delSlot(${pi})">×</button>${badge}<button class="fe" onclick="openModal(${pi})">${isCarr?'Editar':isReels?'Trocar thumb':'Tornar carrossel'}</button>`;
+        cell.addEventListener('click',e=>cellClick(e,pi));
+        cell.addEventListener('dragstart',e=>{if(isSel){e.preventDefault();return;}dragSrc=pi;setTimeout(()=>cell.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
+        cell.addEventListener('dragend',()=>cell.classList.remove('dragging'));
+        cell.addEventListener('dragover',e=>{e.preventDefault();cell.classList.add('drop-over');});
+        cell.addEventListener('dragleave',()=>cell.classList.remove('drop-over'));
+        cell.addEventListener('drop',e=>{e.preventDefault();cell.classList.remove('drop-over');if(dragSrc!==null&&dragSrc!==pi){const t=feedSlots[dragSrc];feedSlots[dragSrc]=feedSlots[pi];feedSlots[pi]=t;dragSrc=null;renderFeed();}});
+      }else{
+        const empty=document.createElement('div');empty.className='fc-empty';
+        if(isReels){
+          empty.innerHTML=`<div style="font-size:10px;color:var(--reels);font-weight:600;margin-bottom:4px;">REELS</div><div class="fc-empty-btns"><button class="er" onclick="(()=>{editSlot=${pi};document.getElementById('fi-reels').click()})()">+ Adicionar thumb</button></div>`;
+        }else{
+          empty.innerHTML=`<div class="ep">+</div><div class="fc-empty-btns"><button class="ec" onclick="addCarrSlot(event)">+ Carrossel</button><button class="er" onclick="addReelsSlot()">+ Reels</button></div>`;
+          empty.onclick=()=>document.getElementById('fi-feed').click();
+        }
+        g.appendChild(empty);continue;
+      }
+      g.appendChild(cell);
+    }else{
+      const e=document.createElement('div');e.className='fc-empty';
+      e.innerHTML=`<div class="ep">+</div><div class="fc-empty-btns"><button class="ec" onclick="addCarrSlot(event)">+ Carrossel</button><button class="er" onclick="addReelsSlot()">+ Reels</button></div>`;
+      e.onclick=()=>document.getElementById('fi-feed').click();g.appendChild(e);
+    }
+  }
+  applyT();
+  renderIgGrid();
+}
+renderFeed();
+
+function renderIgGrid(){
+  const g=document.getElementById('ig-grid');g.innerHTML='';
+  const n=feedSlots.length,total=Math.max(Math.ceil(Math.max(n,1)/3)*3,9);
+  for(let vi=0;vi<total;vi++){
+    const pi=total-1-vi;
+    const cell=document.createElement('div');cell.className='ig-cell';
+    if(pi<n&&feedSlots[pi].imgs.length>0){
+      const slot=feedSlots[pi];
+      cell.innerHTML=`<img src="${slot.imgs[0].src}">`;
+      if(slot.type==='reels')cell.innerHTML+=`<div class="ig-reels-icon"><svg viewBox="0 0 24 24" fill="white"><path d="M5 4l15 8-15 8V4z"/></svg></div>`;
+      if(slot.type==='carousel')cell.innerHTML+=`<div class="ig-carr-icon"><svg viewBox="0 0 24 24" fill="white"><rect x="6" y="3" width="13" height="13" rx="2" fill="none" stroke="white" stroke-width="2"/><path d="M3 7v11a2 2 0 002 2h11" stroke="white" stroke-width="2" fill="none"/></svg></div>`;
+    }else{
+      cell.className='ig-cell-empty';
+    }
+    g.appendChild(cell);
+  }
+}
+
+async function exportFeed(){
+  const n=feedSlots.length;const cols=3,rows=Math.max(Math.ceil(Math.max(n,1)/3),3);const total=cols*rows;
+  const CW=300,CH=300;
+  const canvas=document.createElement('canvas');canvas.width=CW*cols+2*(cols-1);canvas.height=CH*rows+2*(rows-1);
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
+  const loadImg=src=>new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.src=src;});
+  for(let vi=0;vi<total;vi++){
+    const pi=total-1-vi;const col=vi%3,row=Math.floor(vi/3);const x=col*(CW+2),y=row*(CH+2);
+    if(pi<n&&feedSlots[pi].imgs.length>0){try{const img=await loadImg(feedSlots[pi].imgs[0].src);ctx.drawImage(img,(img.width-img.width*Math.max(CW/img.width,CH/img.height))/2/Math.max(CW/img.width,CH/img.height),(img.height-img.height*Math.max(CW/img.width,CH/img.height))/2/Math.max(CW/img.width,CH/img.height),img.width/Math.max(CW/img.width,CH/img.height),img.height/Math.max(CW/img.width,CH/img.height),x,y,CW,CH);}catch(e){}}else{ctx.fillStyle='#111';ctx.fillRect(x,y,CW,CH);}
+  }
+  const a=document.createElement('a');a.download='feed-diana-felix.png';a.href=canvas.toDataURL('image/png');a.click();
+}
+
+function exportClientHTML(){
+  const user=document.getElementById('ig-user').value||'usuario';
+  const name=document.getElementById('ig-name').value||'Nome';
+  const bio=document.getElementById('ig-bio').value||'';
+  const n=feedSlots.length,total=Math.max(Math.ceil(Math.max(n,1)/3)*3,9);
+  let cells='';
+  for(let vi=0;vi<total;vi++){
+    const pi=total-1-vi;
+    if(pi<n&&feedSlots[pi].imgs.length>0){
+      const slot=feedSlots[pi];
+      let icon='';
+      if(slot.type==='reels')icon=`<div style="position:absolute;top:4px;right:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M5 4l15 8-15 8V4z"/></svg></div>`;
+      if(slot.type==='carousel')icon=`<div style="position:absolute;top:4px;right:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="6" y="3" width="13" height="13" rx="2"/><path d="M3 7v11a2 2 0 002 2h11"/></svg></div>`;
+      cells+=`<div style="position:relative;aspect-ratio:1;background:#111;overflow:hidden;"><img src="${slot.imgs[0].src}" style="width:100%;height:100%;object-fit:cover;display:block;">${icon}</div>`;
+    }else{
+      cells+=`<div style="aspect-ratio:1;background:#111;"></div>`;
+    }
+  }
+  const avatarHtml=avatarSrc
+    ?`<img src="${avatarSrc}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+    :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;">📷</div>`;
+  const bioHtml=bio.split('\n').join('<br>');
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${name} — Aprovação de Feed</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{background:#000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;}header{background:#000;padding:10px 14px 0;border-bottom:0.5px solid #262626;}.topbar{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;}.username{font-size:15px;font-weight:700;color:#fff;}.profile-row{display:flex;align-items:center;gap:14px;padding:10px 0 8px;}.avatar-ring{width:76px;height:76px;border-radius:50%;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);padding:2.5px;flex-shrink:0;}.avatar-inner{width:100%;height:100%;border-radius:50%;border:2.5px solid #000;overflow:hidden;background:#2a2a2a;}.name{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;}.bio{font-size:12px;color:#fff;line-height:1.5;white-space:pre-wrap;}.tabs{display:flex;border-top:0.5px solid #262626;margin-top:6px;}.tab{flex:1;display:flex;justify-content:center;padding:10px 0;}.tab.active{border-bottom:1px solid #fff;}.tab svg{width:22px;height:22px;}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#000;}.watermark{text-align:center;padding:20px;font-size:11px;color:#444;}.approve-bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;border-top:0.5px solid #333;padding:12px 16px;display:flex;gap:10px;max-width:480px;margin:0 auto;}.approve-btn{flex:1;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}.btn-approve{background:#4CAF7A;color:#fff;}.btn-reject{background:#333;color:#aaa;}</style></head><body><header><div class="topbar"><span class="username">${user}</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="profile-row"><div class="avatar-ring"><div class="avatar-inner">${avatarHtml}</div></div><div><div class="name">${name}</div><div class="bio">${bioHtml}</div></div></div><div class="tabs"><div class="tab active"><svg viewBox="0 0 24 24" fill="white"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg></div><div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg></div><div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div></header><div class="grid">${cells}</div><div class="watermark">Programação de feed — ${name}</div><div style="height:80px;"></div><div class="approve-bar"><button class="approve-btn btn-reject" onclick="if(confirm('Enviar solicitação de ajuste?'))alert('Mensagem enviada!')">Solicitar ajuste</button><button class="approve-btn btn-approve" onclick="if(confirm('Aprovar este feed?'))alert('Feed aprovado! ✓')">Aprovar feed ✓</button></div></body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');a.download=`feed-${user}-aprovacao.html`;a.href=URL.createObjectURL(blob);a.click();
+}
+</script>
+</body>
+</html>

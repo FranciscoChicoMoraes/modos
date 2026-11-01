@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { BarChart3, FileText, Users, Settings, Menu, X, Moon, Sun, Image, BookOpen, Film } from 'lucide-react'
+import { BarChart3, Users, Settings, Menu, X, Moon, Sun, Image, BookOpen, Film, Grid2x2, Music, CalendarDays, ClipboardList } from 'lucide-react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 
 interface SidebarProps {
@@ -12,12 +12,14 @@ interface SidebarProps {
 
 const menuItems = [
   { href: '/dashboard', icon: BarChart3, label: 'Dashboard' },
-  { href: '/processo-seletivo', icon: FileText, label: 'Processo Seletivo' },
-  { href: '/vagas', icon: Users, label: 'Vagas' },
-  { href: '/demandas', icon: FileText, label: 'Demandas' },
+  { href: '/processo-seletivo', icon: Users, label: 'Processo Seletivo' },
+  { href: '/demandas', icon: ClipboardList, label: 'Demandas' },
+  { href: '/feed', icon: Grid2x2, label: 'Feed' },
   { href: '/marketing', icon: Image, label: 'Marketing' },
   { href: '/videoflow', icon: Film, label: 'VideoFlow' },
   { href: '/conteudos', icon: BookOpen, label: 'Conteúdos' },
+  { href: '/playlist', icon: Music, label: 'Playlist' },
+  { href: '/calendario', icon: CalendarDays, label: 'Calendário' },
   { href: '/configuracoes', icon: Settings, label: 'Configurações' },
 ]
 
